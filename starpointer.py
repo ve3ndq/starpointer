@@ -5,17 +5,17 @@ from skyfield.api import Topos, load
 import time
 
 stations_url = 'http://celestrak.com/NORAD/elements/stations.txt'
+satellites = load.tle(stations_url)
+satellite = satellites['ISS (ZARYA)']
+
+print('-------------------SATELLITE:')
+print(satellite)
+
+print('EPOCH')
+print(satellite.epoch.utc_jpl())
+
 
 while (1==1):
-    satellites = load.tle(stations_url)
-    satellite = satellites['ISS (ZARYA)']
-
-    print('-------------------SATELLITE:')
-    print(satellite)
-
-    print('EPOCH')
-    print(satellite.epoch.utc_jpl())
-
 
     ts = load.timescale()
     #t = ts.utc(2014, 1, 23, 11, 18, 7)
