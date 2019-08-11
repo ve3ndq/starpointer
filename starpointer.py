@@ -1,6 +1,6 @@
 import sys
-sys.path.append("/usr/local/lib/python3.6/site-packages/skyfield")
-
+#sys.path.append("/usr/local/lib/python3.6/site-packages/skyfield")
+print(sys.path)
 from skyfield.api import Topos, load
 stations_url = 'http://celestrak.com/NORAD/elements/stations.txt'
 satellites = load.tle(stations_url)
@@ -14,13 +14,13 @@ print(satellite.epoch.utc_jpl())
 
 
 ts = load.timescale()
-t = ts.utc(2014, 1, 23, 11, 18, 7)
+#t = ts.utc(2014, 1, 23, 11, 18, 7)
 t=ts.now()
 
 days = t - satellite.epoch
 print('{:.3f} days away from epoch'.format(days))
 #TESTING 123
-if abs(days) > 14:
+if abs(days) > 7:
     satellites = load.tle(stations_url, reload=True)
     satellite = satellites['ISS (ZARYA)']
 
@@ -48,6 +48,12 @@ print(alt)
 print(az)
 print(distance.km)
 ra, dec, distance = topocentric.radec()  # ICRF ("J2000")
+
+subpoint = geocentric.subpoint()
+print('Latitude:', subpoint.latitude)
+print('Longitude:', subpoint.longitude)
+print('Elevation (m):', int(subpoint.elevation.m))
+
 
 #print("RA/DEC:")
 #print(ra)
