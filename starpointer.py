@@ -17,7 +17,7 @@ t=ts.now()
 
 days = t - satellite.epoch
 print('{:.3f} days away from epoch'.format(days))
-
+#TESTING 123
 if abs(days) > 14:
     satellites = load.tle(stations_url, reload=True)
     satellite = satellites['ISS (ZARYA)']
