@@ -4,6 +4,44 @@ print(sys.path)
 from skyfield.api import Topos, load
 import time
 
+#RPi Pinouts
+
+#I2C Pins
+#GPIO2 -> SDA
+#GPIO3 -> SCL
+
+#Import the Library Required
+import smbus
+import time
+import starpointer
+
+
+# for RPI version 1, use "bus = smbus.SMBus(0)"
+bus = smbus.SMBus(1)
+
+# This is the address we setup in the Arduino Program
+#Slave Address 4
+address = 0x04
+
+mystr1 = "\0" * 100
+mystr2 = "\0" * 100
+
+data_list1=list()
+data_list2=list()
+
+def writeNumber(value):
+    bus.write_byte(address, value)
+    #bus.write_block_data(address, 0, value)
+    return -1
+
+def readNumber():
+    number = bus.read_byte(address)
+    return number
+
+
+
+
+
 stations_url = 'http://celestrak.com/NORAD/elements/stations.txt'
 satellites = load.tle(stations_url)
 satellite = satellites['ISS (ZARYA)']
@@ -65,6 +103,30 @@ while (1==1):
     print('Latitude:', subpoint.latitude)
     print('Longitude:', subpoint.longitude)
     print('Elevation (m):', int(subpoint.elevation.m))
+
+    mystr1 = str(alt.degrees)
+    mystr2 = str(az.degrees)
+
+    for i in range(len(mystr1)):
+        data_list1.append(ord(mystr1[i]))
+
+    for i in range(len(mystr2)):
+        data_list2.append(ord(mystr2[i]))
+
+    bus.write_block_data(address,ord("E"),data_list1)
+    print('I would send E data')
+    print(data_list1)
+    time.sleep(0.1)    #Wait for the data_list
+    bus.write_block_data(address,ord("A"),data_list1)
+    print('I would send A data')
+    print(data_list2)
+    time.sleep(0.1)
+    data_list1=[]
+    data_list2=[]
+
+
+
+
     time.sleep(3)
 
 #print("RA/DEC:")

@@ -32,8 +32,8 @@ while True:
 	#Receives the data from the User
 	data = input("Enter the data to be sent : ")
 
-	for i in range(65,67):
-		data_list.append(i)
+#	for i in range(65,67):
+#		data_list.append(i)
 
 	data_list = []
 	mystr = data
