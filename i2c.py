@@ -1,12 +1,14 @@
 #RPi Pinouts
 
-#I2C Pins 
+#I2C Pins
 #GPIO2 -> SDA
 #GPIO3 -> SCL
 
-#Import the Library Required 
+#Import the Library Required
 import smbus
 import time
+import starpointer
+
 
 # for RPI version 1, use "bus = smbus.SMBus(0)"
 bus = smbus.SMBus(1)
@@ -28,17 +30,17 @@ def readNumber():
 
 while True:
 	#Receives the data from the User
-	data = raw_input("Enter the data to be sent : ")
+	data = input("Enter the data to be sent : ")
 
 	for i in range(65,67):
 		data_list.append(i)
-	
+
 	data_list = []
 	mystr = data
-	
+
 	for i in range(len(mystr)):
 		data_list.append(ord(mystr[i]))
-		
+
 	bus.write_block_data(address,ord("E"),data_list)
 	time.sleep(0.1)
 	data_list=[]
@@ -54,4 +56,3 @@ while True:
 #Write a new line
 #	writeNumber(int(0x0A))
 #End of the Script
-
