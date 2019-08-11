@@ -1,5 +1,7 @@
-from skyfield.api import Topos, load
+import sys
+sys.path.append("/usr/local/lib/python3.6/site-packages/skyfield")
 
+from skyfield.api import Topos, load
 stations_url = 'http://celestrak.com/NORAD/elements/stations.txt'
 satellites = load.tle(stations_url)
 satellite = satellites['ISS (ZARYA)']
