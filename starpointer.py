@@ -1,6 +1,6 @@
 import sys
 #sys.path.append("/usr/local/lib/python3.6/site-packages/skyfield")
-print(sys.path)
+#print(sys.path)
 from skyfield.api import Topos, load
 import time
 
@@ -49,8 +49,8 @@ satellite = satellites['ISS (ZARYA)']
 print('-------------------SATELLITE:')
 print(satellite)
 
-print('EPOCH')
-print(satellite.epoch.utc_jpl())
+#print('EPOCH')
+#print(satellite.epoch.utc_jpl())
 
 
 while (1==1):
@@ -69,19 +69,19 @@ while (1==1):
     geocentric = satellite.at(t)
 
 
-    print('GEOCENTRIC POS:')
-    print(geocentric.position.km)
+    #print('GEOCENTRIC POS:')
+    #print(geocentric.position.km)
 
     #bluffton = Topos('40.8939 N', '83.8917 W')
     burlington = Topos('43.328674 N', '79.817734 W')
 
     difference = satellite - burlington
-    print('DIFFERENCE:')
-    print(difference)
+    #print('DIFFERENCE:')
+    #print(difference)
 
     topocentric = difference.at(t)
-    print('TOPOCENTRIC POSITION:')
-    print(topocentric.position.km)
+    #print('TOPOCENTRIC POSITION:')
+    #print(topocentric.position.km)
 
 
     #if alt.degrees > 0:
@@ -107,27 +107,32 @@ while (1==1):
     mystr1 = str(alt.degrees)
     mystr2 = str(az.degrees)
 
+
+
     for i in range(len(mystr1)):
         data_list1.append(ord(mystr1[i]))
 
     for i in range(len(mystr2)):
         data_list2.append(ord(mystr2[i]))
-
+    print('I sent E data')
+    print(ord("E"),data_list1)
     bus.write_block_data(address,ord("E"),data_list1)
-    print('I would send E data')
-    print(data_list1)
-    time.sleep(0.1)    #Wait for the data_list
-    bus.write_block_data(address,ord("A"),data_list1)
-    print('I would send A data')
-    print(data_list2)
-    time.sleep(0.1)
+    #print('I would send E data')
+    #print(data_list1)
+    time.sleep(0.5)    #Wait for the data_list
+    print('I sent A data')
+    print(ord("A"),data_list2)
+    bus.write_block_data(address,ord("A"),data_list2)
+    #print('I would send A data')
+    #print(data_list2)
+    time.sleep(0.5)
     data_list1=[]
     data_list2=[]
 
 
 
 
-    time.sleep(3)
+    time.sleep(1)
 
 #print("RA/DEC:")
 #print(ra)
