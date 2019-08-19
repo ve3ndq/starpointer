@@ -50,12 +50,12 @@ def readNumber():
 while (1==1):
 
 
-    #mystr1 = str(90.0)
-    #mystr2 = str(180.0)
+    mystr1 = str(90.0)
+    mystr2 = str(180.0)
 
 
-    mystr1 = str(random.randint(0,3600)/10)
-    mystr2 = str(random.randint(0,3600)/10)
+    #mystr1 = str(random.randint(0,3600)/10)
+    #mystr2 = str(random.randint(0,3600)/10)
 
     for i in range(len(mystr1)):
         data_list1.append(ord(mystr1[i]))
@@ -64,11 +64,11 @@ while (1==1):
         data_list2.append(ord(mystr2[i]))
 
 
-    bus.write_block_data(address,ord("E"),data_list1)
+    bus.write_block_data(address,ord("X"),data_list1)
     print('I sent E data')
     print(ord("E"),data_list1)
     time.sleep(0.1)    #Wait for the data_list
-    bus.write_block_data(address,ord("A"),data_list2)
+    bus.write_block_data(address,ord("X"),data_list2)
     print('I sent A data')
     print(ord("A"),data_list2)
     time.sleep(0.1)

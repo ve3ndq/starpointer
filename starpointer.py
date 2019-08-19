@@ -3,6 +3,7 @@ import sys
 #print(sys.path)
 from skyfield.api import Topos, load
 import time
+import shlex, subprocess
 
 #RPi Pinouts
 
@@ -13,7 +14,7 @@ import time
 #Import the Library Required
 import smbus
 import time
-import starpointer
+#import starpointer
 
 
 # for RPI version 1, use "bus = smbus.SMBus(0)"
@@ -89,14 +90,14 @@ while (1==1):
     alt, az, distance = topocentric.altaz()
 
 
-    print("ALT/AZ/DIST:")
+    print("EL(alt):")
     print(alt)
     print(alt.degrees)
     print('Az:')
     print(az)
     print(az.degrees)
-    print('Distance:')
-    print(distance.km)
+#    print('Distance:')
+#    print(distance.km)
     ra, dec, distance = topocentric.radec()  # ICRF ("J2000")
 
     subpoint = geocentric.subpoint()
@@ -114,25 +115,41 @@ while (1==1):
 
     for i in range(len(mystr2)):
         data_list2.append(ord(mystr2[i]))
-    print('I sent E data')
-    print(ord("E"),data_list1)
-    bus.write_block_data(address,ord("E"),data_list1)
+#    print('I sent E data')
+#    print(ord("E"),data_list1)
+
+
+    try:
+        bus.write_block_data(address,ord("E"),data_list1)
+    except IOError:
+        subprocess.call(['i2cdetect', '-y', '1'])
+        flag = 1     #optional flag to signal your code to resend or something
+
+
     #print('I would send E data')
     #print(data_list1)
-    time.sleep(0.5)    #Wait for the data_list
-    print('I sent A data')
-    print(ord("A"),data_list2)
-    bus.write_block_data(address,ord("A"),data_list2)
+    time.sleep(0.3)    #Wait for the data_list
+#    print('I sent A data')
+#    print(ord("A"),data_list2)
+
+    try:
+        bus.write_block_data(address,ord("A"),data_list2)
+    except IOError:
+        subprocess.call(['i2cdetect', '-y', '1'])
+        flag = 1     #optional flag to signal your code to resend or something
+
+
+
     #print('I would send A data')
     #print(data_list2)
-    time.sleep(0.5)
+    time.sleep(0.3)
     data_list1=[]
     data_list2=[]
 
 
 
 
-    time.sleep(1)
+    time.sleep(0.3)
 
 #print("RA/DEC:")
 #print(ra)
