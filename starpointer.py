@@ -4,6 +4,7 @@ import sys
 from skyfield.api import Topos, load
 import time
 import shlex, subprocess
+import os
 
 #RPi Pinouts
 
@@ -39,13 +40,28 @@ def readNumber():
     number = bus.read_byte(address)
     return number
 
-
-
+def debugprint(tempval):
+    os.system('clear')
+    print('SATELLITE:')
+    print(satellite)
+    print('{:.3f} days away from epoch'.format(days))
+    print("EL(alt):")
+    print(alt)
+    print(alt.degrees)
+    print('Az:')
+    print(az)
+    print(az.degrees)
+    print('Geocentric:')
+    print('Latitude:', subpoint.latitude)
+    print('Longitude:', subpoint.longitude)
+    print('Elevation (m):', int(subpoint.elevation.m))
 
 
 stations_url = 'http://celestrak.com/NORAD/elements/stations.txt'
+stations_url = 'http://celestrak.com/NORAD/elements/visual.txt'
 satellites = load.tle(stations_url)
 satellite = satellites['ISS (ZARYA)']
+#satellite = satellites['NOAA 18']
 
 print('-------------------SATELLITE:')
 print(satellite)
@@ -61,7 +77,7 @@ while (1==1):
     t=ts.now()
 
     days = t - satellite.epoch
-    print('{:.3f} days away from epoch'.format(days))
+#    print('{:.3f} days away from epoch'.format(days))
     #TESTING 123
     if abs(days) > 7:
         satellites = load.tle(stations_url, reload=True)
@@ -89,21 +105,22 @@ while (1==1):
     #    print('The ISS is above the horizon')
     alt, az, distance = topocentric.altaz()
 
-
-    print("EL(alt):")
-    print(alt)
-    print(alt.degrees)
-    print('Az:')
-    print(az)
-    print(az.degrees)
+#    print('SATELLITE:')
+#    print(satellite)
+#    print("EL(alt):")
+#    print(alt)
+#    print(alt.degrees)
+#    print('Az:')
+#    print(az)
+#    print(az.degrees)
 #    print('Distance:')
 #    print(distance.km)
     ra, dec, distance = topocentric.radec()  # ICRF ("J2000")
-
+#    print('Geocentric:')
     subpoint = geocentric.subpoint()
-    print('Latitude:', subpoint.latitude)
-    print('Longitude:', subpoint.longitude)
-    print('Elevation (m):', int(subpoint.elevation.m))
+#    print('Latitude:', subpoint.latitude)
+#    print('Longitude:', subpoint.longitude)
+#    print('Elevation (m):', int(subpoint.elevation.m))
 
     mystr1 = str(alt.degrees)
     mystr2 = str(az.degrees)
@@ -148,8 +165,8 @@ while (1==1):
 
 
 
-
-    time.sleep(0.3)
+    debugprint(1)
+    time.sleep(0.1)
 
 #print("RA/DEC:")
 #print(ra)
