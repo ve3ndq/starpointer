@@ -12,7 +12,7 @@ const int AzMOTOR_DIRECTION_PIN = 10;
 
 
 
-/*
+/* 
   I2C Pinouts
   SDA -> A4
   SCL -> A5
