@@ -12,7 +12,7 @@ const int AzMOTOR_DIRECTION_PIN = 10;
 
 
 
-/* 
+/*
   I2C Pinouts
   SDA -> A4
   SCL -> A5
@@ -26,9 +26,11 @@ FlexyStepper stepperAz;
 int rx =0;
 float AzTarget =0;
 float ElTarget =0;
-float fEl;
-float fAz;
-
+float fEl;//elevation in degrees
+float fAz;//az in degrees
+float X;//Enable/Disable Steppers 0=disable
+float J;//Jog El in steps
+float K;//Jog Az in steps
 float mvsteps=0;
 
 
@@ -45,20 +47,19 @@ void setup() {
 
 
   stepperAz.connectToPins(AzMOTOR_STEP_PIN, AzMOTOR_DIRECTION_PIN);
-  stepperAz.setStepsPerRevolution(16*400);
+  stepperAz.setStepsPerRevolution(38400);
   stepperAz.setCurrentPositionInSteps(0);
-  stepperAz.setSpeedInRevolutionsPerSecond(9);
-  stepperAz.setAccelerationInStepsPerSecondPerSecond(9000);
+  stepperAz.setSpeedInRevolutionsPerSecond(0.005);
+  stepperAz.setAccelerationInStepsPerSecondPerSecond(100);
 
   stepperEl.connectToPins(ElMOTOR_STEP_PIN, ElMOTOR_DIRECTION_PIN);
-  stepperEl.setStepsPerRevolution(16*200);
+  stepperEl.setStepsPerRevolution(38400);
   stepperEl.setCurrentPositionInSteps(0);
-  stepperEl.setSpeedInRevolutionsPerSecond(9);
-  stepperEl.setAccelerationInStepsPerSecondPerSecond(9000);
+  stepperEl.setSpeedInRevolutionsPerSecond(0.005);
+  stepperEl.setAccelerationInStepsPerSecondPerSecond(100);
 
-  pinMode(INV_STEPPER_ENABLE,OUTPUT);
-  digitalWrite(INV_STEPPER_ENABLE,false);
-//  digitalWrite(INV_STEPPER_ENABLE,true);
+  pinMode(INV_STEPPER_ENABLE,OUTPUT); //
+  digitalWrite(INV_STEPPER_ENABLE,false); //false is enable stepper drivers
 
   // initialize i2c as slave
   Serial.begin(115200);
@@ -73,53 +74,84 @@ void setup() {
 
 float old;
 float currentpos;
+float Z=0;
+int i;
+
+
 void loop() {
+  if (fAz>360){
+    fAz=360;
+  }
+  if (fAz<-360){
+    fAz=-360;
+  }
   stepperAz.setTargetPositionInRevolutions(degToRot(fAz));
+
+  if (fEl<0){ //Prevent pointing down.
+    fEl=0;
+  }
+  if (fEl>80){ //Prevent pointing up.
+    fEl=80;
+  }
   stepperEl.setTargetPositionInRevolutions(degToRot(fEl));
 
+
+//processMovement
   if (!stepperAz.motionComplete()){
       stepperAz.processMovement();
-      /*
-      currentpos = stepperAz.getCurrentPositionInRevolutions();
-
-
-      Serial.print("CurrentAz (Rev):");
-      Serial.print(currentpos);
-      Serial.print("-CurrentAz Target:");
-      Serial.print(fAz);
-      Serial.println();
-      */
   }
-
-  currentpos=0;
   if (!stepperEl.motionComplete()){
       stepperEl.processMovement();
-      /*
-      currentpos = stepperEl.getCurrentPositionInRevolutions();
-
-      Serial.print("CurrentEl (Rev):");
-      Serial.print(currentpos);
-      Serial.print("-CurrentEl Target:");
-      Serial.print(fEl);
-      Serial.println();
-      */
   }
-currentpos=0;
 
 
 
-//  stepperAz.moveToPositionInRevolutions(degToRot(fEl));
-//  stepperEl.moveToPositionInRevolutions(degToRot(fEl));
-/*
-  while((!stepperAz.motionComplete()) || (!stepperEl.motionComplete()))
-    {
+  if (Z !=0){//Set stepper zero
+    digitalWrite(INV_STEPPER_ENABLE,true); //true is disable stepper drivers
 
-      stepperAz.processMovement();
-      stepperEl.processMovement();
-
+    for (int i = 0; i <= Z; i++) {
+      delay(1000);
     }
-*/
-  delay(1);
+
+
+    digitalWrite(INV_STEPPER_ENABLE,false); //false is disable stepper drivers
+    stepperAz.setCurrentPositionInSteps(0);
+    stepperEl.setCurrentPositionInSteps(0);
+
+    Z=0;
+  }
+
+
+  if (J !=0){//Jog Elevation Steps
+
+    for (int i = 0; i <= J; i++) {
+      stepperEl.moveRelativeInSteps(J);
+      J=0;
+    }
+  }
+
+  if (K !=0){//Jog Az Steps
+
+    for (int i = 0; i <= J; i++) {
+      stepperEl.moveRelativeInSteps(J);
+      J=0;
+    }
+  }
+
+
+
+  if(X=1){
+    digitalWrite(INV_STEPPER_ENABLE,false); //false is enable stepper drivers
+  }
+
+  if(X=0){
+    digitalWrite(INV_STEPPER_ENABLE,true); //true is disable stepper drivers
+  }
+
+
+
+
+  delay(1); //delay 1ms
 } // end loop
 
 
@@ -136,14 +168,8 @@ void GetSerialData(){
 //Serial.println("GettingSerial");
 while (Serial.available() == 0);
   val = Serial.parseInt(); //read int or parseFloat for ..float...
-
-rx=val;
-//Serial.println(val);
-
+  rx=val;
 }
-
-
-
 
 // callback for received data
 void receiveData(int byteCount) {
@@ -152,65 +178,48 @@ void receiveData(int byteCount) {
   String mystring;
   String sTemp;
 
-  //Serial.print("Avail: ");
-  //Serial.print(Wire.available());
-  //Serial.print("\n");
-
-//  Serial.print("i2cRX>");
     while (Wire.available()) {
       i2cRX[i] = Wire.read();
-/*    Serial.print("|");
-    Serial.print(int(i2cRX[i]));
-    Serial.print(i2cRX[i]);
-    Serial.print("|");
-
-*/
-//    Serial.print(i2cRX[i]);
-    i++;
+      i++;
     }
-
-//    Serial.println("<i2cRX");     i++;
-//    Serial.print("Complete i2cRX:");
-//    Serial.println(i2cRX);
 
     if (i2cRX[0]=='E'){//Elevation Target
       sTemp=String(i2cRX);
       sTemp=sTemp.substring(2,sTemp.length());
-//      Serial.print("sTemp:" + sTemp);
       fEl=sTemp.toFloat();
-//      Serial.print("fEl:");
-//      Serial.println(fEl);
     }
 
     if (i2cRX[0]=='A'){//Azimuth Target
       sTemp=String(i2cRX);
       sTemp=sTemp.substring(2,sTemp.length());
-//      Serial.print("sTemp:" + sTemp);
       fAz=sTemp.toFloat();
-//      Serial.print("fAz:");
-//      Serial.println(fAz);
-
-    if (i2cRX[0]=='Z'){//Home Servos
+    }
+    if (i2cRX[0]=='Z'){//Home Servos, parameter is seconds to wait.
       sTemp=String(i2cRX);
       sTemp=sTemp.substring(2,sTemp.length());
-//      Serial.print("sTemp:" + sTemp);
-      fAz=sTemp.toFloat();
-//      Serial.print("fAz:");
-//      Serial.println(fAz);
+      Z=sTemp.toFloat();
+    }
 
+    if (i2cRX[0]=='X'){//Enable (1=ON, 0=OFF)
+      sTemp=String(i2cRX);
+      sTemp=sTemp.substring(2,sTemp.length());
+      X=sTemp.toFloat();
+    }
 
+    if (i2cRX[0]=='J'){//Jog X Steps
+      sTemp=String(i2cRX);
+      sTemp=sTemp.substring(2,sTemp.length());
+      J=sTemp.toFloat();
+    }
+    if (i2cRX[0]=='K'){//Jog X Steps
+      sTemp=String(i2cRX);
+      sTemp=sTemp.substring(2,sTemp.length());
+      K=sTemp.toFloat();
     }
 
   memset(i2cRX, 0, sizeof(i2cRX));  //Clear i2cRX
 
 }
-
-
-
-
-
-
-
 
 
 // callback for sending data
