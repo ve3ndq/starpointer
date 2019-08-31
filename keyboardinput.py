@@ -90,16 +90,15 @@ while (quit==0):
         quit=1
 
     if (inputcommand == 'E'):
-        print("E was input")
-        value=(input("Elevation in Degrees:"))
+        value=str(input("Elevation in Degrees:"))
         for i in range(len(value)):
-            data_list1.append(ord(mystr1[i]))
+            data_list1.append(ord(value[i]))
         try:
             bus.write_block_data(address,ord("E"),data_list1)
         except IOError:
             subprocess.call(['i2cdetect', '-y', '1'])
             flag = 1     #optional flag to signal your code to resend or something
-
+        data_list1=[];
 
 
 
