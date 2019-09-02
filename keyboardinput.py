@@ -101,9 +101,28 @@ while (quit==0):
         data_list1=[];
 
 
+    if (inputcommand == 'J'):
+        value=str(input("Number of Steps:"))
+        for i in range(len(value)):
+            data_list1.append(ord(value[i]))
+        try:
+            bus.write_block_data(address,ord("J"),data_list1)
+        except IOError:
+            subprocess.call(['i2cdetect', '-y', '1'])
+            flag = 1     #optional flag to signal your code to resend or something
+        data_list1=[];
 
 
-
+    if (inputcommand == 'Z'):
+        value=str(input("Number of Seconds:"))
+        for i in range(len(value)):
+            data_list1.append(ord(value[i]))
+        try:
+            bus.write_block_data(address,ord("Z"),data_list1)
+        except IOError:
+            subprocess.call(['i2cdetect', '-y', '1'])
+            flag = 1     #optional flag to signal your code to resend or something
+        data_list1=[];
 
 
 

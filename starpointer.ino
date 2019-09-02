@@ -10,7 +10,10 @@ const int ElMOTOR_DIRECTION_PIN = 12;
 const int AzMOTOR_STEP_PIN = 9;
 const int AzMOTOR_DIRECTION_PIN = 10;
 
-
+const int MAXEL=71;
+const int MINEL=0;
+const int MAXAZ=360;
+const int MINAZ=-360;
 
 /*
   I2C Pinouts
@@ -47,13 +50,14 @@ void setup() {
 
 
   stepperAz.connectToPins(AzMOTOR_STEP_PIN, AzMOTOR_DIRECTION_PIN);
-  stepperAz.setStepsPerRevolution(38400);
+//  stepperAz.setStepsPerRevolution(38400);
+  stepperAz.setStepsPerRevolution(38090);
   stepperAz.setCurrentPositionInSteps(0);
   stepperAz.setSpeedInRevolutionsPerSecond(0.005);
   stepperAz.setAccelerationInStepsPerSecondPerSecond(100);
 
   stepperEl.connectToPins(ElMOTOR_STEP_PIN, ElMOTOR_DIRECTION_PIN);
-  stepperEl.setStepsPerRevolution(38400);
+  stepperEl.setStepsPerRevolution(38090);
   stepperEl.setCurrentPositionInSteps(0);
   stepperEl.setSpeedInRevolutionsPerSecond(0.005);
   stepperEl.setAccelerationInStepsPerSecondPerSecond(100);
@@ -79,21 +83,7 @@ int i;
 
 
 void loop() {
-  if (fAz>360){
-    fAz=360;
-  }
-  if (fAz<-360){
-    fAz=-360;
-  }
-  stepperAz.setTargetPositionInRevolutions(degToRot(fAz));
 
-  if (fEl<0){ //Prevent pointing down.
-    fEl=0;
-  }
-  if (fEl>80){ //Prevent pointing up.
-    fEl=80;
-  }
-  stepperEl.setTargetPositionInRevolutions(degToRot(fEl));
 
 
 //processMovement
@@ -106,36 +96,38 @@ void loop() {
 
 
 
-  if (Z !=0){//Set stepper zero
-    digitalWrite(INV_STEPPER_ENABLE,true); //true is disable stepper drivers
+//  if (Z !=0){//Set stepper zero
+//    digitalWrite(INV_STEPPER_ENABLE,true); //true is disable stepper drivers
 
-    for (int i = 0; i <= Z; i++) {
-      delay(1000);
-    }
-
-
-    digitalWrite(INV_STEPPER_ENABLE,false); //false is disable stepper drivers
-    stepperAz.setCurrentPositionInSteps(0);
-    stepperEl.setCurrentPositionInSteps(0);
-
-    Z=0;
-  }
+//    for (int i = 0; i <= Z; i++) {
+//      delay(1000);
+//    }
+//
+//
+//    digitalWrite(INV_STEPPER_ENABLE,false); //false is disable stepper drivers
+//    stepperAz.setCurrentPositionInSteps(0);
+//    stepperEl.setCurrentPositionInSteps(0);
+//
+//    Z=0;
+//  }
 
 
   if (J !=0){//Jog Elevation Steps
-
-    for (int i = 0; i <= J; i++) {
+  
+//    for (int i = 0; i <= J; i++) {
       stepperEl.moveRelativeInSteps(J);
       J=0;
-    }
+//    }
+  
+  
   }
 
   if (K !=0){//Jog Az Steps
 
-    for (int i = 0; i <= J; i++) {
-      stepperEl.moveRelativeInSteps(J);
-      J=0;
-    }
+ //   for (int i = 0; i <= K; i++) {
+      stepperAz.moveRelativeInSteps(K);
+      K=0;
+ //   }
   }
 
 
@@ -187,17 +179,68 @@ void receiveData(int byteCount) {
       sTemp=String(i2cRX);
       sTemp=sTemp.substring(2,sTemp.length());
       fEl=sTemp.toFloat();
+      if (fAz>MAXAZ){
+        fAz=MAXAZ;
+      }
+      if (fAz<MINAZ){
+        fAz=MINAZ;
+      }
+      stepperAz.setTargetPositionInRevolutions(degToRot(fAz));
+    
+      if (fEl<MINEL){ //Prevent pointing down.
+        fEl=MINEL;
+      }
+      if (fEl>MAXEL){ //Prevent pointing up.
+        fEl=MAXEL;
+      }
+      stepperEl.setTargetPositionInRevolutions(degToRot(fEl));
     }
 
     if (i2cRX[0]=='A'){//Azimuth Target
       sTemp=String(i2cRX);
       sTemp=sTemp.substring(2,sTemp.length());
       fAz=sTemp.toFloat();
+      if (fAz>360){
+        fAz=360;
+      }
+      if (fAz<-360){
+        fAz=-360;
+      }
+      stepperAz.setTargetPositionInRevolutions(degToRot(fAz));
+    
+      if (fEl<0){ //Prevent pointing down.
+        fEl=0;
+      }
+      if (fEl>71){ //Prevent pointing up.
+        fEl=80;
+      }
+      stepperEl.setTargetPositionInRevolutions(degToRot(fEl));
+
+    
+    
     }
     if (i2cRX[0]=='Z'){//Home Servos, parameter is seconds to wait.
       sTemp=String(i2cRX);
       sTemp=sTemp.substring(2,sTemp.length());
       Z=sTemp.toFloat();
+      if (Z != 0){
+        digitalWrite(INV_STEPPER_ENABLE,true); //true is disable stepper drivers
+        for (int i = 0; i <= Z; i++) {
+          delay(1000);
+        }
+      }
+  
+      digitalWrite(INV_STEPPER_ENABLE,false); //false is disable stepper drivers
+      stepperAz.setCurrentPositionInSteps(0);
+      stepperEl.setCurrentPositionInSteps(0);
+      stepperAz.setTargetPositionInRevolutions(0);
+      stepperEl.setTargetPositionInRevolutions(0);
+      
+      fEl=0;
+      fAz=0;
+      Z=0;
+    
+    
     }
 
     if (i2cRX[0]=='X'){//Enable (1=ON, 0=OFF)
