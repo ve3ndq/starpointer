@@ -4,11 +4,11 @@
 //
 // pin assignments
 //
-const int ElMOTOR_STEP_PIN = 11;
-const int ElMOTOR_DIRECTION_PIN = 12;
+const int ElMOTOR_STEP_PIN = 2;
+const int ElMOTOR_DIRECTION_PIN = 5;
 
-const int AzMOTOR_STEP_PIN = 9;
-const int AzMOTOR_DIRECTION_PIN = 10;
+const int AzMOTOR_STEP_PIN = 3;
+const int AzMOTOR_DIRECTION_PIN = 6;
 
 const int MAXEL=71;
 const int MINEL=0;
